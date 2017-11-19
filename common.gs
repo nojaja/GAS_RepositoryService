@@ -14,6 +14,11 @@ var formatDate = function (date, format) {
   return format;
 };
 
+/*
+function toISOFormat(date, tz) {
+  return Utilities.formatDate(date, tz, "yyyy-MM-dd'T'HH:mm:ssXXX");
+};
+*/
 
 /**
  URLの分割を行います。

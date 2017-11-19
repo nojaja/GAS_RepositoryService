@@ -1,16 +1,20 @@
 
-var tableId = '1XhX79O03mdDoEGnOHbyGW2D5HxqYrNcR3SSWep1l'; //作成したFusionTableのurlに含まれるdocidを指定します
+var tableId = '1_sL5eP-Vm63nfDplqME3---yb9Y5ElehHztCjXKw'; //作成したFusionTableのurlに含まれるdocidを指定します
 
-function createBL(e, content) {
+function createBL(_content) {
+  var content = _content;
+  var e = content.request;
   return content;
 }
 routerData.logicMapping['create'] = createBL;
 
-function getContent(e, content) {
+function getContent(_content) {
+  var content = _content;
+  var e = content.request;
   Logger.log('getContent '+e.file);
   // 更新・削除画面の表示
-  //ROWID, code, price, userid, scope, name, type, content, timestamp
-  var sql = "SELECT ROWID, name, type, timestamp, userid, scope, content FROM " + tableId + " WHERE name = '" + e.file +"'";
+  //ROWID, code, price, uid, scope, filename, ext, content, timestamp
+  var sql = "SELECT ROWID, filename, ext, timestamp, uid, scope, content FROM " + tableId + " WHERE filename = '" + e.file +"'";
   Logger.log('getContent sql:'+sql);
   var result = FusionTables.Query.sqlGet(sql);
   
@@ -18,8 +22,8 @@ function getContent(e, content) {
   if( result.rows.length > 0 ) {
     var row = result.rows[0];
     content.result.row_id = row[0];
-    content.result.name = row[1];
-    content.result.type = row[2];
+    content.result.filename = row[1];
+    content.result.ext = row[2];
     content.result.scope = row[5];
     content.result.content = Utilities.newBlob(Utilities.base64Decode( row[6], Utilities.Charset.UTF_8)).getDataAsString();
   }
@@ -27,18 +31,20 @@ function getContent(e, content) {
 }
 routerData.logicMapping['content'] = getContent;
 
-function getContentById(e, content) {
+function getContentById(_content) {
+  var content = _content;
+  var e = content.request;
   // 更新・削除画面の表示
-  //ROWID, code, price, userid, scope, name, type, content, timestamp
-  var sql = 'SELECT ROWID, name, type, timestamp, userid, scope, content FROM ' + tableId + ' WHERE ROWID = ' + e.parameters.row_id;
+  //ROWID, code, price, uid, scope, filename, ext, content, timestamp
+  var sql = 'SELECT ROWID, filename, ext, timestamp, uid, scope, content FROM ' + tableId + ' WHERE ROWID = ' + e.parameters.row_id;
   var result = FusionTables.Query.sqlGet(sql);
   
   content.result = {"columns":result.columns,"length":result.rows.length};
   if( result.rows.length > 0 ) {
     var row = result.rows[0];
     content.result.row_id = row[0];
-    content.result.name = row[1];
-    content.result.type = row[2];
+    content.result.filename = row[1];
+    content.result.ext = row[2];
     content.result.scope = row[5];
     content.result.content = Utilities.newBlob(Utilities.base64Decode( row[6], Utilities.Charset.UTF_8)).getDataAsString();
   }
@@ -46,10 +52,12 @@ function getContentById(e, content) {
 }
 routerData.logicMapping['update'] = getContentById;
 
-function publicList(e, content) {
+function publicList(_content) {
+  var content = _content;
+  var e = content.request;
   // 一覧画面の表示
-  //ROWID, code, price, userid, scope, name, type, content, timestamp
-  var sql = 'SELECT ROWID, name, type, timestamp, userid, scope FROM ' + tableId 
+  //ROWID, code, price, uid, scope, filename, ext, content, timestamp
+  var sql = 'SELECT ROWID, filename, ext, timestamp, uid, scope FROM ' + tableId 
     + ' WHERE '
     + " scope NOT EQUAL TO 'private' "
     + ' LIMIT 100';
@@ -59,12 +67,14 @@ function publicList(e, content) {
 }
 routerData.logicMapping['default'] = publicList;
 
-function mylist(e, content) {
+function mylist(_content) {
+  var content = _content;
+  var e = content.request;
   // 一覧画面の表示
-  //ROWID, code, price, userid, scope, name, type, content, timestamp
-  var sql = 'SELECT ROWID, name, type, timestamp, userid, scope FROM ' + tableId 
+  //ROWID, code, price, uid, scope, filename, ext, content, timestamp
+  var sql = 'SELECT ROWID, filename, ext, timestamp, uid, scope FROM ' + tableId 
     + ' WHERE '
-    + " userid = '" + e.userid + "'"
+    + " uid = '" + e.uid + "'"
     + ' LIMIT 100';
   var result = FusionTables.Query.sqlGet(sql);
   content.result = {"columns":result.columns,"rows":result.rows};
@@ -74,16 +84,18 @@ routerData.logicMapping['mylist'] = mylist;
 
 
 // レコード追加
-function createRecordBL(e, content) {
-  var form = { name :e.parameters.name || ""
-              ,type :e.parameters.name || "txt"
+function createRecordBL(_content) {
+  var content = _content;
+  var e = content.request;
+  var form = { filename :e.parameters.filename || ""
+              ,ext :e.parameters.ext || "txt"
               ,timestamp :formatDate(new Date())
               ,scope :e.parameters.scope || "public"
               ,content :Utilities.base64Encode(e.parameters.content, Utilities.Charset.UTF_8) || ""
              }
   var sql = "INSERT INTO " + tableId
-   + " ('name','type','timestamp','userid','scope','content')"
-   + " VALUES ('" + form.name + "','" + form.type + "','" + form.timestamp + "','" + e.userid + "','" + form.scope + "','" + form.content + "')";
+   + " ('name','ext','timestamp','uid','scope','content')"
+   + " VALUES ('" + form.filename + "','" + form.ext + "','" + form.timestamp + "','" + e.uid + "','" + form.scope + "','" + form.content + "')";
   FusionTables.Query.sql(sql);
 }
 routerData.logicMapping['createRecord'] = createRecordBL;
@@ -91,22 +103,24 @@ routerData.logicMapping['createRecord'] = createRecordBL;
 // レコード追加
 function createRecord(form) {
   var e ={"parameter":{},"contextPath":"","contentLength":-1,"queryString":"","parameters":form,"pathInfo":"createRecord.json"};
-  makeResponse(e,"GET");
+  doExec(e,"GET");
 }
 
 // レコード更新
-function updateRecordBL(e, content) {
+function updateRecordBL(_content) {
+  var content = _content;
+  var e = content.request;
   var form = { row_id : e.parameters.row_id
-              ,name :e.parameters.name || ""
-              ,type :e.parameters.name || "txt"
+              ,filename :e.parameters.filename || ""
+              ,ext :e.parameters.ext || "txt"
               ,timestamp :formatDate(new Date())
               ,scope :e.parameters.scope || "public"
               ,content :Utilities.base64Encode(e.parameters.content, Utilities.Charset.UTF_8)|| ""
              }
   var sql = "UPDATE " + tableId
-   + " SET name='" + form.name + "', type='" + form.type + "', timestamp='" + form.timestamp + "', userid='" + e.userid + "', scope='" + form.scope + "', content='" + form.content + "'"
+   + " SET filename='" + form.filename + "', ext='" + form.ext + "', timestamp='" + form.timestamp + "', uid='" + e.uid + "', scope='" + form.scope + "', content='" + form.content + "'"
    + " WHERE ROWID = '" + form.row_id + "'";
-   //+ " and userid = '" + e.userid + "'";
+   //+ " and uid = '" + e.uid + "'";
   Logger.log(sql);
   FusionTables.Query.sql(sql);
 }
@@ -114,15 +128,17 @@ routerData.logicMapping['updateRecord'] = updateRecordBL;
 // レコード更新
 function updateRecord(form) {
   var e ={"parameter":{},"contextPath":"","contentLength":-1,"queryString":"","parameters":form,"pathInfo":"updateRecord.json"};
-  makeResponse(e,"GET");
+  doExec(e,"GET");
 }
 
 
 // レコード削除
-function deleteRecordBL(e, content) {
+function deleteRecordBL(_content) {
+  var content = _content;
+  var e = content.request;
   var form = { row_id :e.parameters.row_id || ""};
   var sql = "DELETE FROM " + tableId + " WHERE ROWID = '" + form.row_id + "'";
-  // + " WHERE userid = '" + e.userid + "'";
+  // + " WHERE uid = '" + e.uid + "'";
   FusionTables.Query.sql(sql);
 }
 routerData.logicMapping['deleteRecord'] = deleteRecordBL;
@@ -130,5 +146,5 @@ routerData.logicMapping['deleteRecord'] = deleteRecordBL;
 // レコード削除
 function deleteRecord(form) {
   var e ={"parameter":{},"contextPath":"","contentLength":-1,"queryString":"","parameters":form,"pathInfo":"deleteRecord.json"};
-  makeResponse(e,"GET");
+  doExec(e,"GET");
 }

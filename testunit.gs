@@ -11,6 +11,6 @@ function doGetTest() {
 }
 
 function createRecordTest() {
-  var e ={"parameter":{},"contextPath":"","contentLength":-1,"queryString":"","parameters":{"code":"test","name":"test","price":100},"pathInfo":"my/test/createRecord.json"};
+  var e ={"parameter":{},"contextPath":"","contentLength":-1,"queryString":"","parameters":{"code":"test","filename":"test","price":100},"pathInfo":"my/test/createRecord.json"};
   return doExec(e,"GET");
 }
