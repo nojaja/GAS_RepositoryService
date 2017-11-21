@@ -22,10 +22,20 @@ function toISOFormat(date, tz) {
 
 /**
  URLの分割を行います。
- ret [0]:filename [1]:path [2]:file name  [3]:ext
+ ret [0]:fullpath [1]:path [2]:full filename [3]:filename  [4]:ext
 */
 var splitExt = function (filename) {
   //return filename.split(/\.(?=[^.]+$)/);
   //(.*/)?(.+?)\.([a-z]+)([\?#;].*)?$
-  return filename.match("(.*/)?(.+?)\.([a-z]+)([\?#;].*)?$");
+  //(.*/)?((.+?)\.([a-z]+))?([\?#;].*)?$
+  /*
+  my/test/index.html
+group(0)	my/test/index.html
+group(1)	my/test/
+group(2)	index.html
+group(3)	index
+group(4)	html
+group(5)	
+  */
+  return filename.match("(.*/)?((.+?)\.([a-z]+))?([\?#;].*)?$");
 }

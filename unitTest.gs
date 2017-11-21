@@ -14,3 +14,18 @@ function createRecordTest() {
   var e ={"parameter":{},"contextPath":"","contentLength":-1,"queryString":"","parameters":{"code":"test","filename":"test","price":100},"pathInfo":"my/test/createRecord.json"};
   return doExec(e,"GET");
 }
+
+function doGetFileTest() {
+  var e ={"parameter":{},"contextPath":"","contentLength":-1,"queryString":"","parameters":{},"pathInfo":"my/test/index.html"};
+  return doExec(e,"GET");
+}
+
+function do404FileTest() {
+  var e ={"parameter":{},"contextPath":"","contentLength":-1,"queryString":"","parameters":{},"pathInfo":"my/test/404.html"};
+  return doExec(e,"GET");
+}
+
+function doGetListTest() {
+  var e ={"parameter":{},"contextPath":"","contentLength":-1,"queryString":"","parameters":{},"pathInfo":"my/test/"};
+  return doExec(e,"GET");
+}

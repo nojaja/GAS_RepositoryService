@@ -23,12 +23,13 @@ function doGet(e) {
 
 function doExec (e,type) {
   e.type = type;
-  e.userid = Session.getActiveUser().getEmail();
+  //e.userid = Session.getActiveUser().getEmail();
+  e.userid = "";
   e.baseurl = ScriptApp.getService().getUrl();
   e.action = 'init';
   var content  = {request:e,response:{}};
   content = router(content);
-  content = makeResponse(content);
+  //content = makeResponse(content);
   return content.response;
   /*
   if (e.ext=='json') {
@@ -41,14 +42,17 @@ function doExec (e,type) {
 
 function router(_content) {
   var content = _content;
+  Logger.log('======================== ');
   Logger.log('router action='+content.request.action);
   if(content.request.action){
     var action = content.request.action+'';
     content.request.action = "";
     content = routerData.logicMapping[action](content)
     Logger.log('router content='+JSON.stringify(content));
+    Logger.log('======================== ');
     return router(content);
   }else{
+    Logger.log('======================== ');
     return content
   }
 }
@@ -58,9 +62,15 @@ function init(_content) {
   var e = content.request;
   Logger.log('init '+e.pathInfo);
   var pathInfo = splitExt(e.pathInfo||'');
+  Logger.log('pathInfo[1] '+pathInfo[1]);
+  if(!pathInfo[1]){
+    //e.action = 'projectList';
+    e.action = 'publicList';
+    return content;
+  }
   e.path = pathInfo[1].split("/");
-  e.file = pathInfo[2]||'';
-  e.ext = pathInfo[3]||'';
+  e.filename = pathInfo[3]||'';
+  e.ext = pathInfo[4]||'';
     
   e.uid = e.path[0]||'';
   e.projectid = e.path[1]||'';
@@ -69,7 +79,7 @@ function init(_content) {
   Logger.log('projectid '+e.projectid);
   Logger.log('type '+e.type);
   if(e.type=='GET'){
-    if(e.file){ // get
+    if(e.filename){ // get
       e.action = 'content';
     }else{//search
       e.action = 'publicList';
@@ -94,19 +104,29 @@ function makeResponse(_content) {
   Logger.log('makeResponse response:'+content.response);
   return content
 }
+routerData.logicMapping['makeResponse'] = makeResponse;
 
-function makeExtJsonContent(e, content) {
+
+function makeExtJsonContent(content) {
   var content  = JSON.stringify(content);
-  Logger.log('makeExtJsonContent '+content);
+  var e = content.request;
+  Logger.log('makeExtJsonContent '+content.result);
   if (!e.parameter.callback) {
-    return ContentService.createTextOutput(content).setMimeType(ContentService.MimeType.JSON);
+    content.response = ContentService.createTextOutput(content.result).setMimeType(ContentService.MimeType.JSON);
   } else {
-    return ContentService.createTextOutput(e.parameter.callback + "(" + content + ");").setMimeType(ContentService.MimeType.JAVASCRIPT);
+    content.response = ContentService.createTextOutput(e.parameter.callback + "(" + content.result + ");").setMimeType(ContentService.MimeType.JAVASCRIPT);
   }
+  Logger.log('makeExtJsonContent response:'+content.response);
+  return content
 }
+routerData.logicMapping['makeExtJsonContent'] = makeExtJsonContent;
 
-function makeExtHtmlContent(e, content) {
-    var output = HtmlService.createTemplateFromFile(e.file);
-    output.content = content;
-    return output.evaluate();
+function makeExtHtmlContent(content) {
+  var e = content.request;
+  var output = HtmlService.createTemplateFromFile(e.pageId);
+  output.content = content;
+  content.response = output.evaluate();
+  Logger.log('makeExtHtmlContent response:'+content.response);
+  return content
 }
+routerData.logicMapping['makeExtHtmlContent'] = makeExtHtmlContent;

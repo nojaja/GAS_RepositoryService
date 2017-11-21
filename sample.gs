@@ -11,21 +11,26 @@ routerData.logicMapping['create'] = createBL;
 function getContent(_content) {
   var content = _content;
   var e = content.request;
-  Logger.log('getContent '+e.file);
+  Logger.log('getContent '+e.filename);
   // 更新・削除画面の表示
   //ROWID, code, price, uid, scope, filename, ext, content, timestamp
-  var sql = "SELECT ROWID, filename, ext, timestamp, uid, scope, content FROM " + tableId + " WHERE filename = '" + e.file +"'";
+  var sql = "SELECT ROWID, filename, ext, timestamp, uid, scope, content FROM " + tableId + " WHERE filename = '" + e.filename +"'";
   Logger.log('getContent sql:'+sql);
   var result = FusionTables.Query.sqlGet(sql);
+  Logger.log('getContent result:'+result);
   
-  content.result = {"columns":result.columns,"length":result.rows.length};
-  if( result.rows.length > 0 ) {
+  if( result.rows && result.rows.length > 0 ) {
+    content.result = {"columns":result.columns,"length":result.rows.length};
     var row = result.rows[0];
     content.result.row_id = row[0];
     content.result.filename = row[1];
     content.result.ext = row[2];
     content.result.scope = row[5];
     content.result.content = Utilities.newBlob(Utilities.base64Decode( row[6], Utilities.Charset.UTF_8)).getDataAsString();
+    e.action = 'makeResponse';
+  }else{
+    e.action = 'makeExtHtmlContent';
+    e.pageId = '404';
   }
   return content;
 }
@@ -48,6 +53,7 @@ function getContentById(_content) {
     content.result.scope = row[5];
     content.result.content = Utilities.newBlob(Utilities.base64Decode( row[6], Utilities.Charset.UTF_8)).getDataAsString();
   }
+  e.action = 'makeResponse';
   return content;
 }
 routerData.logicMapping['update'] = getContentById;
@@ -63,9 +69,15 @@ function publicList(_content) {
     + ' LIMIT 100';
   var result = FusionTables.Query.sqlGet(sql);
   content.result = {"columns":result.columns,"rows":result.rows};
-  return content;
+ 
+  var output = HtmlService.createTemplateFromFile("list");
+  output.content = content;
+  content.response = output.evaluate();
+  Logger.log('publicList response:'+content.response);
+  return content
+  
 }
-routerData.logicMapping['default'] = publicList;
+routerData.logicMapping['publicList'] = publicList;
 
 function mylist(_content) {
   var content = _content;
