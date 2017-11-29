@@ -1,0 +1,45 @@
+<html>
+  <head>
+    <base target="_top" />
+    <style>
+    body { margin:10px; }
+    </style>
+
+  </head>
+  <body>
+
+<?=JSON.stringify(content.request)?><br>
+<script>
+function onSuccess(data) {
+  console.log(data);
+  alert('追加しました');
+}
+</script>
+<h2><?=content.request.filename ?>は見つかりませんでした。</h2>
+
+<form>
+<div><label>uid</label><input name="uid" value="<?= content.request.uid ?>"></div>
+<div><label>projectid</label><input name="projectid" value="<?= content.request.projectid ?>"></div>
+
+<div><label>scope</label><input name="scope" value="public"></div>
+<div><label>datafile</label><input type="file" name="datafile"></div>
+<input type="button" onclick="google.script.run.withSuccessHandler(onSuccess).createRecord(this.parentNode);" value="追加">
+</form>
+
+<form action="<?=content.request.baseurl ?>?p=/<?= content.request.uid ?>/<?= content.request.projectid ?>/<?= content.request.filename ?>.<?= content.request.ext ?>" method="post" enctype="multipart/form-data" accept-charset='utf8'>
+<div><label>uid</label><input name="uid" value="<?= content.request.uid ?>"></div>
+<div><label>projectid</label><input name="projectid" value="<?= content.request.projectid ?>"></div>
+
+<div><label>scope</label><input name="scope" value="public"></div>
+<div><label>datafile</label><input type="file" name="datafile"></div>
+<input type='submit' value='submit'>
+</form>
+<br>
+<a href="<?=content.request.baseurl ?>/">戻る</a>
+
+
+
+
+
+  </body>
+</html>
