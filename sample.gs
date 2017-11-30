@@ -107,14 +107,29 @@ function createRecordBL(_content) {
               ,ext :e.ext|| "txt"
               ,timestamp :formatDate(new Date())
               ,scope :e.parameters.scope || "public"
-              ,content :Utilities.base64Encode(encodeString(e.parameters.datafile.contents), Utilities.Charset.UTF_8) || ""
+              ,content :Utilities.base64Encode((e.parameters.datafile.contents), Utilities.Charset.UTF_8) || ""
              }
   var sql = "INSERT INTO " + tableId
    + " ('filename','ext','timestamp','uid','scope','content')"
    + " VALUES ('" + form.filename + "','" + form.ext + "','" + form.timestamp + "','" + e.uid + "','" + form.scope + "','" + form.content + "')";
-  Logger.log('createRecordBL sql#1:'+sql);
+
+  //FusionTables.Table.update(resource, tableId)
+  var temp = [];
+  temp.push(e.uid);
+  temp.push(e.projectid);
+  temp.push(form.filename);
+  temp.push(form.ext);
+  temp.push(form.content);
+  temp.push(form.scope);
+  temp.push(form.timestamp);
+  var rowsData = '"'+temp.join('","')+'"';
+    Logger.log('createRecordBL rowsData#1:'+rowsData);
+  var mediaData = Utilities.newBlob(rowsData, "application/octet-stream");
+    Logger.log('createRecordBL mediaData#1:'+mediaData);
+  
+  FusionTables.Table.importRows(tableId, mediaData);
   Logger.log('=================:');
-  FusionTables.Query.sql(sql);
+  //FusionTables.Query.sql(sql);
   return content;
 }
 routerData.logicMapping['createRecord'] = createRecordBL;
@@ -147,7 +162,7 @@ function updateRecordBL(_content) {
   Logger.log('updateRecordBL result:'+selectresult);
   
   if( selectresult.rows && selectresult.rows.length > 0 ) {
-    
+    /*
     var row = selectresult.rows[0];
     var row_id = row[0];
     
@@ -157,15 +172,28 @@ function updateRecordBL(_content) {
               ,ext :e.ext || "txt"
               ,timestamp :formatDate(new Date())
               ,scope :e.parameters.scope || "public"
-              ,content :Utilities.base64Encode(encodeString(e.parameters.datafile.contents), Utilities.Charset.UTF_8) || ""
+              ,content :Utilities.base64Encode((e.parameters.datafile.contents), Utilities.Charset.UTF_8) || ""
              }
     var sql = "UPDATE " + tableId
      + " SET timestamp='" + form.timestamp + "', scope='" + form.scope + "', content='" + form.content + "'"
      + " WHERE ROWID = '" + row_id + "'";
     Logger.log('updateRecordBL sql#2:'+sql);
+    
     var cnt = FusionTables.Query.sql(sql);
     Logger.log('updateRecordBL rows:'+cnt.rows);
     content.result = {"rows":cnt.rows};
+    */
+    var row = selectresult.rows[0];
+    var row_id = row[0];
+    
+    var sql = "DELETE FROM " + tableId + " WHERE ROWID = '" + row_id + "'";
+    
+    Logger.log('updateRecordBL sql#2:'+sql);
+    
+    var cnt = FusionTables.Query.sql(sql);
+    Logger.log('updateRecordBL rows:'+cnt.rows);
+    e.action = 'createRecord';
+    
   }else{
     e.action = 'createRecord';
   }
