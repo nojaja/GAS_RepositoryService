@@ -13,6 +13,7 @@
   </head>
   <body>
   
+<div class="uk-container uk-container-center">
 <!-- This is the button toggling the off-canvas sidebar -->
 <button class="uk-button" data-uk-offcanvas="{target:'#offcanvas-1'}">menu</button>
 
@@ -38,11 +39,15 @@
   </div>
 </div>
 
-<div class="uk-container uk-container-center">
+
+<br>
+
+<div class="uk-grid" data-uk-grid-margin="">
+  <div class="tm-sidebar uk-width-medium-1-4 uk-hidden-small uk-row-first">
+
     <div class="uk-panel uk-panel-box uk-panel-box-secondary ">
-    
-      <h3 class="uk-panel-title">File</h3>
-      <ul class="uk-nav uk-nav-side uk-nav-parent-icon" data-uk-nav="">
+      <h3 class="uk-panel-title">File List</h3>
+      <ul class="tm-nav uk-nav uk-nav-side uk-nav-parent-icon" data-uk-nav="">
       <li ><a href="<?=content.request.baseurl ?>?p=/uid/"><i class="uk-icon-arrow-left"></i> ..</a></li>
 <?
   if( content.result.rows && content.result.rows.length > 0 ) {
@@ -53,10 +58,62 @@
 <?
     }
   }
-?>
+?>                    
       </ul>
     </div>
+  </div>
+  <div class="tm-main uk-width-medium-3-4">
+    <article class="uk-article">
+    <h1 class="uk-article-title">File</h1>
+      <div class="uk-grid" data-uk-grid-margin="">
+      
+      
+<?
+    var rows = content.result.rows;
+    for( var i=0;i<rows.length;i++ ) {
+?>
+                                <div class="uk-width-medium-1-3">
+                                    <div class="uk-panel uk-panel-box">
+                                        <h3 class="uk-panel-title"><a href="<?=content.request.baseurl ?>?p=/uid/<?= content.request.projectid ?>/<?= rows[i][1] ?>.<?= rows[i][2]?>"><i class="uk-icon-file-code-o"></i><?= rows[i][1] ?>.<?= rows[i][2]?></a></h3>
+                                        <div class="uk-panel-badge uk-badge"><?= rows[i][5] ?></div>
+                                        <?= rows[i][3] ?>
+                                        <hr>
+                                        <a class="uk-button" href="">edit</a>
+                                    </div>
+                                </div>
+<?
+    }
+?>
+
+      
+                                <div class="uk-width-medium-1-3">
+                                    <div class="uk-panel uk-panel-box">
+                                        <h3 class="uk-panel-title">ADD</h3>
+<form id="form1" class="uk-form" action="<?=content.request.baseurl ?>?p=/<?= content.request.uid ?>/<?= content.request.projectid ?>/<?= content.request.filename ?>.<?= content.request.ext ?>" method="post" enctype="multipart/form-data" accept-charset='utf8'>
+<!--
+datafile":{"type":"text/plain","length":9659,"contents":
+-->
+<input type="hidden" name="uid" value="<?= content.request.uid ?>">
+<input type="hidden" name="projectid" value="<?= content.request.projectid ?>">
+<div><label>scope</label><input name="scope" value="public"></div>
+<input type="hidden" id="filename" name="datafilefilename" value="">
+<input type="hidden" id="contents" name="datafilecontents" value="">
+<input type="hidden" type="file" id="file">
+<input type="hidden" id="type" name="datafiletype" value="">
+<input type="hidden" id="length" name="datafilelength" value="">
+<hr>
+<input class="uk-button" type='submit' value='submit'>
+</form>
+                                    </div>
+                                </div>
+      </div>
+
+    </article>
+  </div>
+
+</div>
 <br>
+
 
 <?
   if( content.result.rows && content.result.rows.length > 0 ) {
