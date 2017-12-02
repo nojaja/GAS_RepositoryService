@@ -5,32 +5,63 @@
     body { margin:10px; }
     </style>
 
+    <title>Procject List</title>
+    <link rel="stylesheet prefetch" href="//cdnjs.cloudflare.com/ajax/libs/uikit/2.12.0/css/uikit.min.css">
+    <link rel="stylesheet prefetch" href="//cdnjs.cloudflare.com/ajax/libs/uikit/2.12.0/css/components/notify.min.css">
+  
   </head>
   <body>
   
 <script>
 </script>
 
+<!-- This is the button toggling the off-canvas sidebar -->
+<button class="uk-button" data-uk-offcanvas="{target:'#offcanvas-1'}">menu</button>
 
+<!-- This is the off-canvas sidebar -->
+<div id="offcanvas-1" class="uk-offcanvas" aria-hidden="false">
+  <div class="uk-offcanvas-bar " mode="push">
 
-<?=JSON.stringify(content.request)?><br>
-<table border="1" cellpadding="3" cellspacing="0">
-  <tr>
-   <th>project</th>
- </tr>
+    <ul class="uk-nav uk-nav-offcanvas uk-nav-parent-icon" data-uk-nav="">
+      <li class="uk-nav-header">Project</li>
 <?
   var rows = content.result.rows;
   for( var i=0;i<rows.length;i++ ) {
-?>
-  <tr>
-   <td><a href="<?=content.request.baseurl ?>?p=/uid/<?= rows[i][0]?>/"><?= rows[i][0]?></a></td>
- </tr>
+?>                              
+        <li class="uk-parent"><a href="<?=content.request.baseurl ?>?p=/uid/<?= rows[i][0]?>/"><i class="uk-icon-folder"></i> <?= rows[i][0]?></a></li>
 <?
   }
 ?>
-</table>
-<br>
+    </ul>
+  </div>
+</div>
+
+<div class="uk-container uk-container-center">
+  <div class="uk-width-medium-1-3">
+    <div class="uk-panel uk-panel-box">
+    
+      <h3 class="uk-panel-title">Project</h3>
+      <ul class="uk-nav uk-nav-side uk-nav-parent-icon" data-uk-nav="">
+<?
+  var rows = content.result.rows;
+  for( var i=0;i<rows.length;i++ ) {
+?>                              
+        <li class="uk-parent"><a href="<?=content.request.baseurl ?>?p=/uid/<?= rows[i][0]?>/"><i class="uk-icon-folder"></i> <?= rows[i][0]?></a></li>
+<?
+  }
+?>
+      </ul>
+
+    </div>
+  </div>
+</div>
+
+<?=JSON.stringify(content.request)?><br>
 
 
+<script src="https://cdnjs.cloudflare.com/ajax/libs/jquery/3.1.1/jquery.min.js"></script>
+<script src="https://code.jquery.com/jquery-migrate-3.0.0.js"></script>
+<script src="https://cdnjs.cloudflare.com/ajax/libs/uikit/2.12.0/js/uikit.min.js"></script>
+<script src="https://cdnjs.cloudflare.com/ajax/libs/uikit/2.12.0/js/components/notify.min.js"></script>
   </body>
 </html>

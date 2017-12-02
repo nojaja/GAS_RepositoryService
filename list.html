@@ -5,59 +5,248 @@
     body { margin:10px; }
     </style>
 
+    <title>File List</title>
+    <script src="//nojaja.github.io/js/Encoding.js"></script>
+    <link rel="stylesheet prefetch" href="//cdnjs.cloudflare.com/ajax/libs/uikit/2.12.0/css/uikit.min.css">
+    <link rel="stylesheet prefetch" href="//cdnjs.cloudflare.com/ajax/libs/uikit/2.12.0/css/components/notify.min.css">
+  
   </head>
   <body>
   
-<script>
-google.script.url.getLocation(function(location) {
-  console.log(JSON.stringify(location));
-});
-function onSuccess(data) {
-  console.log(data);
-  alert('追加しました');
-}
+<!-- This is the button toggling the off-canvas sidebar -->
+<button class="uk-button" data-uk-offcanvas="{target:'#offcanvas-1'}">menu</button>
 
-</script>
+<!-- This is the off-canvas sidebar -->
+<div id="offcanvas-1" class="uk-offcanvas" aria-hidden="false">
+  <div class="uk-offcanvas-bar " mode="push">
 
+    <ul class="uk-nav uk-nav-offcanvas uk-nav-parent-icon" data-uk-nav="">
+      <li class="uk-nav-header">File</li>
+      <li ><a href="<?=content.request.baseurl ?>?p=/uid/"><i class="uk-icon-arrow-left"></i> ..</a></li>
 
+<?
+  if( content.result.rows && content.result.rows.length > 0 ) {
+    var rows = content.result.rows;
+    for( var i=0;i<rows.length;i++ ) {
+?>                              
+      <li ><a href="<?=content.request.baseurl ?>?p=/uid/projectid/<?= rows[i][1] ?>.<?= rows[i][2]?>"><i class="uk-icon-file-code-o"></i> <?= rows[i][1] ?>.<?= rows[i][2]?></a></li>
+<?
+    }
+  }
+?>
+    </ul>
+  </div>
+</div>
 
+<div class="uk-container uk-container-center">
+    <div class="uk-panel uk-panel-box uk-panel-box-secondary ">
+    
+      <h3 class="uk-panel-title">File</h3>
+      <ul class="uk-nav uk-nav-side uk-nav-parent-icon" data-uk-nav="">
+      <li ><a href="<?=content.request.baseurl ?>?p=/uid/"><i class="uk-icon-arrow-left"></i> ..</a></li>
+<?
+  if( content.result.rows && content.result.rows.length > 0 ) {
+    var rows = content.result.rows;
+    for( var i=0;i<rows.length;i++ ) {
+?>                              
+        <li ><a href="<?=content.request.baseurl ?>?p=/uid/<?= content.request.projectid ?>/<?= rows[i][1] ?>.<?= rows[i][2]?>"><i class="uk-icon-file-code-o"></i> <?= rows[i][1] ?>.<?= rows[i][2]?></a></li>
+<?
+    }
+  }
+?>
+      </ul>
+    </div>
+<br>
 
-<?=JSON.stringify(content.request)?><br>
 <?
   if( content.result.rows && content.result.rows.length > 0 ) {
 ?>
-<table border="1" cellpadding="3" cellspacing="0">
+    <div class="uk-panel uk-panel-box uk-panel-box-secondary">
+      <h3 class="uk-panel-title">File</h3>
+<table class="uk-table uk-table-striped">
+<thead>
   <tr>
    <th>ファイル名</th>
    <th>更新日</th>
    <th>scope</th>
  </tr>
+</thead>
+<tbody>
+  <tr>
+   <td><a href="<?=content.request.baseurl ?>?p=/uid/">..</a></td>
+   <td></td>
+   <td></td>
+ </tr>
+ 
 <?
     var rows = content.result.rows;
     for( var i=0;i<rows.length;i++ ) {
 ?>
   <tr>
-   <td><a href="<?=content.request.baseurl ?>?p=/uid/projectid/<?= rows[i][1] ?>.<?= rows[i][2]?>"><?= rows[i][1] ?>.<?= rows[i][2]?></a></td>
+   <td><a href="<?=content.request.baseurl ?>?p=/uid/<?= content.request.projectid ?>/<?= rows[i][1] ?>.<?= rows[i][2]?>"><?= rows[i][1] ?>.<?= rows[i][2]?></a></td>
    <td><?= rows[i][3] ?></td>
    <td><?= rows[i][5] ?></td>
  </tr>
 <?
     }
 ?>
+</tbody>
 </table>
+    </div>
 <?
   }
 ?>
 <br>
-
-<form>
+<!--
+<div class="uk-panel uk-panel-box uk-panel-box-secondary">
+<form class="uk-form">
 <div><label>uid</label><input name="uid" value="<?= content.request.uid ?>"></div>
 <div><label>projectid</label><input name="projectid" value="<?= content.request.projectid ?>"></div>
 <div><label>scope</label><input name="scope" value="public"></div>
 <div><label>datafile</label><input type="file" name="datafile"></div>
 <input type="button" onclick="google.script.run.withSuccessHandler(onSuccess).createRecord(this.parentNode);" value="追加">
 </form>
+</div>
+-->
+<div class="uk-panel uk-panel-box uk-panel-box-secondary">
+<form id="form1" class="uk-form" action="<?=content.request.baseurl ?>?p=/<?= content.request.uid ?>/<?= content.request.projectid ?>/<?= content.request.filename ?>.<?= content.request.ext ?>" method="post" enctype="multipart/form-data" accept-charset='utf8'>
+<!--
+datafile":{"type":"text/plain","length":9659,"contents":
+-->
+<div><label>uid</label><input name="uid" value="<?= content.request.uid ?>"></div>
+<div><label>projectid</label><input name="projectid" value="<?= content.request.projectid ?>"></div>
+<div><label>scope</label><input name="scope" value="public"></div>
+<input type="hidden" id="filename" name="datafilefilename" value="">
+<input type="hidden" id="contents" name="datafilecontents" value="">
+<div><label>datafile</label><input type="file" id="file"></div>
+<div><label>datafile.type</label><input id="type" name="datafiletype" value=""></div>
+<div><label>datafile.length</label><input id="length" name="datafilelength" value=""></div>
+<input type='submit' value='submit'>
+</form>
+</div>
 
 
+</div>
+<?=JSON.stringify(content.request)?><br>
+
+<script src="https://cdnjs.cloudflare.com/ajax/libs/jquery/3.1.1/jquery.min.js"></script>
+<script src="https://code.jquery.com/jquery-migrate-3.0.0.js"></script>
+<script src="https://cdnjs.cloudflare.com/ajax/libs/uikit/2.12.0/js/uikit.min.js"></script>
+<script src="https://cdnjs.cloudflare.com/ajax/libs/uikit/2.12.0/js/components/notify.min.js"></script>
+
+
+<script>
+function onSuccess(data) {
+  console.log(data);
+  alert('追加しました');
+}
+
+  
+(function() {
+  var inputFile = document.getElementById('file');
+  var datafilecontents = document.getElementById('contents');
+  var datafiletype = document.getElementById('type');
+  var datafilelength = document.getElementById('length');
+  var datafilefilename = document.getElementById('filename');
+  
+  var form1 = document.getElementById('form1');
+  
+
+  function fileChange(ev) {
+    var target = ev.target;
+    var files = target.files;
+
+    console.log(ev);
+    
+		// ファイルが選択されたか
+		if(!(target.value)) return;
+
+		// ------------------------------------------------------------
+		// File オブジェクトを取得（HTML5 世代）
+		// ------------------------------------------------------------
+		// ファイルリストを取得
+		var file_list = target.files;
+		if(!file_list) return;
+
+		// 0 番目の File オブジェクトを取得
+		var file = file_list[0];
+		if(!file) return;
+
+		// ------------------------------------------------------------
+		// FileReader オブジェクトを生成
+		// ------------------------------------------------------------
+		var file_reader = new FileReader();
+
+
+        datafiletype.value = file.type;
+        datafilelength.value = file.size;
+        datafilefilename.value = Encoding.base64Encode(Encoding.convert(Encoding.stringToCode(file.name), 'SJIS'));
+        
+        form1.setAttribute('action',"<?=content.request.baseurl ?>?p=/<?= content.request.uid ?>/<?= content.request.projectid ?>/"+Encoding.urlEncode(Encoding.convert(Encoding.stringToCode(file.name), 'UNICODE')) );
+		// ------------------------------------------------------------
+		// テキストとして読み込む
+		// ------------------------------------------------------------
+		if(file.type.indexOf("text") == 0){
+
+			// ------------------------------------------------------------
+			// 読み込み成功時に実行されるイベント
+			// ------------------------------------------------------------
+			file_reader.onload = function(e){ 
+                var base64 = Encoding.base64Encode(Encoding.convert(Encoding.stringToCode(file_reader.result), 'SJIS'));
+            
+				datafilecontents.value = base64;
+			};
+
+			// ------------------------------------------------------------
+			// 読み込みを開始する（テキスト文字列を得る）
+			// ------------------------------------------------------------
+			file_reader.readAsText(file);
+
+
+		// ------------------------------------------------------------
+		// バイナリとして読み込む
+		// ------------------------------------------------------------
+		}else{
+
+			// ------------------------------------------------------------
+			// 読み込み成功時に実行されるイベント
+			// ------------------------------------------------------------
+			file_reader.onload = function(e){
+				var result = "";
+				var ary_u8 = new Uint8Array(file_reader.result);
+				var i;
+				var str;
+				var num = ary_u8.length;
+				for(i=0;i<num;i++){
+					if(ary_u8[i] < 0x10){
+						str = "0" + ary_u8[i].toString(16);
+					}else{
+						str = ary_u8[i].toString(16);
+					}
+
+					if((i % 16) == 0){
+						result += str;
+					}else if((i % 16) == 15){
+						result += " " + str + "\n";
+					}else{
+						result += " " + str;
+					}
+				}
+				datafile.value = result;
+			};
+
+			// ------------------------------------------------------------
+			// 読み込みを開始する（ArrayBuffer オブジェクトを得る）
+			// ------------------------------------------------------------
+			file_reader.readAsArrayBuffer(file);
+
+		}
+  }
+
+  inputFile.addEventListener('change', fileChange, false);
+
+}());
+
+</script>
   </body>
 </html>

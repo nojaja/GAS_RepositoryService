@@ -19,7 +19,7 @@
 </form>
 
 <br>
-<form action="<?=content.request.baseurl ?>?p=/<?= content.request.uid ?>/<?= content.request.projectid ?>/<?= content.request.filename ?>.<?= content.request.ext ?>" method="post" enctype="multipart/form-data" accept-charset='utf8'>
+<form id="form1" action="<?=content.request.baseurl ?>?p=/<?= content.request.uid ?>/<?= content.request.projectid ?>/<?= content.request.filename ?>.<?= content.request.ext ?>" method="post" enctype="multipart/form-data" accept-charset='utf8'>
 <!--
 datafile":{"type":"text/plain","length":9659,"contents":
 -->
@@ -53,6 +53,7 @@ function onSuccess(data) {
   var datafilelength = document.getElementById('length');
   var datafilefilename = document.getElementById('filename');
   
+  var form1 = document.getElementById('form1');
   
 
   function fileChange(ev) {
@@ -84,6 +85,8 @@ function onSuccess(data) {
         datafiletype.value = file.type;
         datafilelength.value = file.size;
         datafilefilename.value = Encoding.base64Encode(Encoding.convert(Encoding.stringToCode(file.name), 'SJIS'));
+        form1.setAttribute('action',"<?=content.request.baseurl ?>?p=/<?= content.request.uid ?>/<?= content.request.projectid ?>/"+Encoding.urlEncode(Encoding.convert(Encoding.stringToCode(file.name), 'UNICODE')) );
+
 		// ------------------------------------------------------------
 		// テキストとして読み込む
 		// ------------------------------------------------------------
