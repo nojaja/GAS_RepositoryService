@@ -69,6 +69,7 @@
       
       
 <?
+  if( content.result.rows && content.result.rows.length > 0 ) {
     var rows = content.result.rows;
     for( var i=0;i<rows.length;i++ ) {
 ?>
@@ -83,6 +84,7 @@
                                 </div>
 <?
     }
+  }
 ?>
 
       
