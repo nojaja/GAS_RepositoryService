@@ -1,6 +1,79 @@
 
 var tableId = '1_sL5eP-Vm63nfDplqME3---yb9Y5ElehHztCjXKw'; //作成したFusionTableのurlに含まれるdocidを指定します
 
+/*
+/exec/{uid}/{projectid}/{filename}.{ext}
+get → get / search
+ ファイルあり　→ get
+ ファイルなし → search
+ 
+post → update/insert/delete
+　内容あり → update/insert
+　内容なし → delete
+*/
+function init(_content) {
+  var content = _content;
+  var e = content.request;
+  
+  Logger.log('init content='+JSON.stringify(content));
+  if(e.parameters.datafile){
+    Logger.log('init init='+e.parameters.datafile.name);
+    Logger.log('init encodeString='+encodeString(e.parameters.datafile.name));
+    e.pathInfo = e.parameters.uid+"/"+e.parameters.projectid+"/"+encodeString(e.parameters.datafile.name);
+    
+  }
+  if(e.parameter.p){
+    e.pathInfo = e.parameter.p;
+    Logger.log('p '+e.parameter.p);
+  }
+  Logger.log('init '+e.pathInfo||'');
+  var pathInfo = splitPath(e.pathInfo||'');
+  Logger.log('pathInfo '+pathInfo.path);
+  if(!pathInfo.path){
+    //e.action.push('projectList');
+    e.action.push('publicList');
+    return content;
+  }
+  e.path = pathInfo.paths;
+  e.filename = pathInfo.filename;
+  e.ext = pathInfo.ext;
+    
+  e.uid = pathInfo.paths[0]||'';
+  e.projectid = pathInfo.paths[1]||'';
+    
+  Logger.log('uid '+e.uid);
+  Logger.log('projectid '+e.projectid);
+  Logger.log('type '+e.type);
+  if(e.type=='GET'){
+    if(e.filename){ // get
+      e.action.push('content');
+    }else{//search
+      e.action.push('publicList');
+    }
+  }else{
+    if(e.parameters.datafile){ // update/insert
+      e.action.push('updateRecord');
+    }else{
+      if(e.parameters.datafilecontents){ // update/insert
+        var datafilecontents = e.parameters.datafilecontents + '';
+        var datafilename = e.parameters.datafilename + '';
+        var contents = Encoding.codeToString(Encoding.convert(Encoding.base64Decode(datafilecontents), 'UNICODE'));
+        datafilename = Encoding.codeToString(Encoding.convert(Encoding.base64Decode(datafilename), 'UNICODE'));
+ 
+        e.pathInfo = e.parameters.uid+"/"+e.parameters.projectid+"/"+encodeString(datafilename);
+        
+        e.parameters.datafile = {"type":e.parameters.datafiletype,"length":e.parameters.datafilelength,"contents":contents,"name":datafilename}
+        e.action.push('publicList');
+        e.action.push('updateRecord');
+      }else{//delete
+        e.action.push('deleteRecord');
+      }
+    }
+  }
+  return content;
+}
+routerData.logicMapping['init'] = init;
+
 function createBL(_content) {
   var content = _content;
   var e = content.request;
@@ -31,9 +104,9 @@ function getContent(_content) {
   Logger.log('getContent row[6]:'+row[6]);
     content.result.content = Utilities.newBlob(Utilities.base64Decode( row[6], Utilities.Charset.UTF_8)).getDataAsString();
   Logger.log('getContent row[6]#2:'+content.result.content);
-    e.action = 'makeResponse';
+    e.action.push('makeResponse');
   }else{
-    e.action = 'makeExtHtmlContent';
+    e.action.push('makeExtHtmlContent');
     e.pageId = '404';
   }
   return content;
@@ -57,7 +130,7 @@ function getContentById(_content) {
     content.result.scope = row[5];
     content.result.content = Utilities.newBlob(Utilities.base64Decode( row[6], Utilities.Charset.UTF_8)).getDataAsString();
   }
-  e.action = 'makeResponse';
+  e.action.push('makeResponse');
   return content;
 }
 routerData.logicMapping['update'] = getContentById;
@@ -138,13 +211,6 @@ routerData.logicMapping['createRecord'] = createRecordBL;
 function createRecord(form) {
   //{"parameter":{},"contextPath":"","contentLength":-1,"queryString":"","parameters":{"ext":"txt","filename":"bbbb","scope":"","datafile":{"type":"text/plain","length":356,"contents":"ump\r\nsiolabsrv01txtdbmovedat\r\n\r\n","name":"SVNh.txt"},"pathInfo":"createRecord.json"}
   var e ={"parameter":{},"contextPath":"","contentLength":-1,"queryString":"","parameters":form};
- /*
-  var pathInfo = splitExt(e.parameters.uid+"/"+e.parameters.projectid+"/"+e.parameters.datafile.name);
-  
-  e.path = pathInfo[1].split("/");
-  e.filename = pathInfo[3]||'';
-  e.ext = pathInfo[4]||'';
-   */ 
   return JSON.stringify(doExec(e,"POST"));
 }
 
@@ -192,22 +258,23 @@ function updateRecordBL(_content) {
     
     var cnt = FusionTables.Query.sql(sql);
     Logger.log('updateRecordBL rows:'+cnt.rows);
-    e.action = 'createRecord';
+    e.action.push('createRecord');
     
   }else{
-    e.action = 'createRecord';
+    e.action.push('createRecord');
   }
   return content;
 }
 routerData.logicMapping['updateRecord'] = updateRecordBL;
+
 // レコード更新
 function updateRecord(form) {
   var e ={"parameter":{},"contextPath":"","contentLength":-1,"queryString":"","parameters":form};
-  var pathInfo = splitExt(e.parameters.uid+"/"+e.parameters.projectid+"/"+e.parameters.datafile.name);
+  var pathInfo = splitPath(e.parameters.uid+"/"+e.parameters.projectid+"/"+e.parameters.datafile.name);
 
-  e.path = pathInfo[1].split("/");
-  e.filename = pathInfo[3]||'';
-  e.ext = pathInfo[4]||'';
+  e.path = pathInfo.paths;
+  e.filename = pathInfo.filename;
+  e.ext = pathInfo.ext;
     
   return JSON.stringify(doExec(e,"POST"));
 }

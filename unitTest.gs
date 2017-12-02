@@ -1,8 +1,25 @@
+
+function getUUIDTest() {
+  Logger.log(getUUID());
+  Logger.log(getUUID());
+  Logger.log(getUUID());
+  Logger.log(getUUID());
+  Logger.log(getUUID());
+}
+
+
 function Base64Test() {
   
-  Logger.log(Base64.encode("Base64エンコード")); //=> "QmFzZTY044Ko44Oz44Kz44O844OJ"
-  Logger.log(Base64.decode("QmFzZTY044OH44Kz44O844OJ")); //=> "Base64デコード"
+  var base64 = Encoding.base64Encode(Encoding.convert(Encoding.stringToCode("Base64エンコード"), 'SJIS'));
+  Logger.log(base64); //=> "QmFzZTY044Ko44Oz44Kz44O844OJ"
+  Logger.log(Encoding.codeToString(Encoding.convert(Encoding.base64Decode(base64)), 'UNICODE')); //=> "Base64エンコード"
   
+  Logger.log(Encoding.codeToString(Encoding.convert(Encoding.base64Decode("QmFzZTY044OH44Kz44O844OJ")), 'UNICODE')); //=> "Base64エンコード"
+  
+
+
+  //Logger.log(Base64.encode("Base64エンコード")); //=> "QmFzZTY044Ko44Oz44Kz44O844OJ"
+  //Logger.log(Base64.decode("QmFzZTY044OH44Kz44O844OJ")); //=> "Base64デコード"
 }
 
 function convertUNICODETest() {

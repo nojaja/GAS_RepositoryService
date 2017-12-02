@@ -4,41 +4,151 @@
     <style>
     body { margin:10px; }
     </style>
-
+    <script src="//nojaja.github.io/js/Encoding.js"></script>
   </head>
   <body>
 
-<?=JSON.stringify(content.request)?><br>
-<script>
-function onSuccess(data) {
-  console.log(data);
-  alert('追加しました');
-}
-</script>
 <h2><?=content.request.filename ?>は見つかりませんでした。</h2>
 
 <form>
 <div><label>uid</label><input name="uid" value="<?= content.request.uid ?>"></div>
 <div><label>projectid</label><input name="projectid" value="<?= content.request.projectid ?>"></div>
-
 <div><label>scope</label><input name="scope" value="public"></div>
 <div><label>datafile</label><input type="file" name="datafile"></div>
 <input type="button" onclick="google.script.run.withSuccessHandler(onSuccess).createRecord(this.parentNode);" value="追加">
 </form>
 
+<br>
 <form action="<?=content.request.baseurl ?>?p=/<?= content.request.uid ?>/<?= content.request.projectid ?>/<?= content.request.filename ?>.<?= content.request.ext ?>" method="post" enctype="multipart/form-data" accept-charset='utf8'>
+<!--
+datafile":{"type":"text/plain","length":9659,"contents":
+-->
 <div><label>uid</label><input name="uid" value="<?= content.request.uid ?>"></div>
 <div><label>projectid</label><input name="projectid" value="<?= content.request.projectid ?>"></div>
-
 <div><label>scope</label><input name="scope" value="public"></div>
-<div><label>datafile</label><input type="file" name="datafile"></div>
+<input type="hidden" id="filename" name="datafilefilename" value="">
+<input type="hidden" id="contents" name="datafilecontents" value="">
+<div><label>datafile</label><input type="file" id="file"></div>
+<div><label>datafile.type</label><input id="type" name="datafiletype" value=""></div>
+<div><label>datafile.length</label><input id="length" name="datafilelength" value=""></div>
 <input type='submit' value='submit'>
 </form>
+
 <br>
+
 <a href="<?=content.request.baseurl ?>/">戻る</a>
 
 
+<script>
+function onSuccess(data) {
+  console.log(data);
+  alert('追加しました');
+}
 
+  
+(function() {
+  var inputFile = document.getElementById('file');
+  var datafilecontents = document.getElementById('contents');
+  var datafiletype = document.getElementById('type');
+  var datafilelength = document.getElementById('length');
+  var datafilefilename = document.getElementById('filename');
+  
+  
+
+  function fileChange(ev) {
+    var target = ev.target;
+    var files = target.files;
+
+    console.log(ev);
+    
+		// ファイルが選択されたか
+		if(!(target.value)) return;
+
+		// ------------------------------------------------------------
+		// File オブジェクトを取得（HTML5 世代）
+		// ------------------------------------------------------------
+		// ファイルリストを取得
+		var file_list = target.files;
+		if(!file_list) return;
+
+		// 0 番目の File オブジェクトを取得
+		var file = file_list[0];
+		if(!file) return;
+
+		// ------------------------------------------------------------
+		// FileReader オブジェクトを生成
+		// ------------------------------------------------------------
+		var file_reader = new FileReader();
+
+
+        datafiletype.value = file.type;
+        datafilelength.value = file.size;
+        datafilefilename.value = Encoding.base64Encode(Encoding.convert(Encoding.stringToCode(file.name), 'SJIS'));
+		// ------------------------------------------------------------
+		// テキストとして読み込む
+		// ------------------------------------------------------------
+		if(file.type.indexOf("text") == 0){
+
+			// ------------------------------------------------------------
+			// 読み込み成功時に実行されるイベント
+			// ------------------------------------------------------------
+			file_reader.onload = function(e){ 
+                var base64 = Encoding.base64Encode(Encoding.convert(Encoding.stringToCode(file_reader.result), 'SJIS'));
+            
+				datafilecontents.value = base64;
+			};
+
+			// ------------------------------------------------------------
+			// 読み込みを開始する（テキスト文字列を得る）
+			// ------------------------------------------------------------
+			file_reader.readAsText(file);
+
+
+		// ------------------------------------------------------------
+		// バイナリとして読み込む
+		// ------------------------------------------------------------
+		}else{
+
+			// ------------------------------------------------------------
+			// 読み込み成功時に実行されるイベント
+			// ------------------------------------------------------------
+			file_reader.onload = function(e){
+				var result = "";
+				var ary_u8 = new Uint8Array(file_reader.result);
+				var i;
+				var str;
+				var num = ary_u8.length;
+				for(i=0;i<num;i++){
+					if(ary_u8[i] < 0x10){
+						str = "0" + ary_u8[i].toString(16);
+					}else{
+						str = ary_u8[i].toString(16);
+					}
+
+					if((i % 16) == 0){
+						result += str;
+					}else if((i % 16) == 15){
+						result += " " + str + "\n";
+					}else{
+						result += " " + str;
+					}
+				}
+				datafile.value = result;
+			};
+
+			// ------------------------------------------------------------
+			// 読み込みを開始する（ArrayBuffer オブジェクトを得る）
+			// ------------------------------------------------------------
+			file_reader.readAsArrayBuffer(file);
+
+		}
+  }
+
+  inputFile.addEventListener('change', fileChange, false);
+
+}());
+
+</script>
 
 
   </body>
