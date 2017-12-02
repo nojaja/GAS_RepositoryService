@@ -12,12 +12,20 @@
 google.script.url.getLocation(function(location) {
   console.log(JSON.stringify(location));
 });
+function onSuccess(data) {
+  console.log(data);
+  alert('追加しました');
+}
+
 </script>
 
 
 
 
 <?=JSON.stringify(content.request)?><br>
+<?
+  if( content.result.rows && content.result.rows.length > 0 ) {
+?>
 <table border="1" cellpadding="3" cellspacing="0">
   <tr>
    <th>ファイル名</th>
@@ -25,8 +33,8 @@ google.script.url.getLocation(function(location) {
    <th>scope</th>
  </tr>
 <?
-  var rows = content.result.rows;
-  for( var i=0;i<rows.length;i++ ) {
+    var rows = content.result.rows;
+    for( var i=0;i<rows.length;i++ ) {
 ?>
   <tr>
    <td><a href="<?=content.request.baseurl ?>?p=/uid/projectid/<?= rows[i][1] ?>.<?= rows[i][2]?>"><?= rows[i][1] ?>.<?= rows[i][2]?></a></td>
@@ -34,11 +42,21 @@ google.script.url.getLocation(function(location) {
    <td><?= rows[i][5] ?></td>
  </tr>
 <?
-  }
+    }
 ?>
 </table>
+<?
+  }
+?>
 <br>
-<a href="<?=content.request.baseurl ?>/create.html">新規作成</a>   
+
+<form>
+<div><label>uid</label><input name="uid" value="<?= content.request.uid ?>"></div>
+<div><label>projectid</label><input name="projectid" value="<?= content.request.projectid ?>"></div>
+<div><label>scope</label><input name="scope" value="public"></div>
+<div><label>datafile</label><input type="file" name="datafile"></div>
+<input type="button" onclick="google.script.run.withSuccessHandler(onSuccess).createRecord(this.parentNode);" value="追加">
+</form>
 
 
   </body>

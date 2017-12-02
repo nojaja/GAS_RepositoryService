@@ -1,0 +1,36 @@
+<html>
+  <head>
+    <base target="_top" />
+    <style>
+    body { margin:10px; }
+    </style>
+
+  </head>
+  <body>
+  
+<script>
+</script>
+
+
+
+<?=JSON.stringify(content.request)?><br>
+<table border="1" cellpadding="3" cellspacing="0">
+  <tr>
+   <th>project</th>
+ </tr>
+<?
+  var rows = content.result.rows;
+  for( var i=0;i<rows.length;i++ ) {
+?>
+  <tr>
+   <td><a href="<?=content.request.baseurl ?>?p=/uid/<?= rows[i][0]?>/"><?= rows[i][0]?></a></td>
+ </tr>
+<?
+  }
+?>
+</table>
+<br>
+
+
+  </body>
+</html>

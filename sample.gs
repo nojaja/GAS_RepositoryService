@@ -20,7 +20,6 @@ function init(_content) {
     Logger.log('init init='+e.parameters.datafile.name);
     Logger.log('init encodeString='+encodeString(e.parameters.datafile.name));
     e.pathInfo = e.parameters.uid+"/"+e.parameters.projectid+"/"+encodeString(e.parameters.datafile.name);
-    
   }
   if(e.parameter.p){
     e.pathInfo = e.parameter.p;
@@ -29,11 +28,6 @@ function init(_content) {
   Logger.log('init '+e.pathInfo||'');
   var pathInfo = splitPath(e.pathInfo||'');
   Logger.log('pathInfo '+pathInfo.path);
-  if(!pathInfo.path){
-    //e.action.push('projectList');
-    e.action.push('publicList');
-    return content;
-  }
   e.path = pathInfo.paths;
   e.filename = pathInfo.filename;
   e.ext = pathInfo.ext;
@@ -44,6 +38,12 @@ function init(_content) {
   Logger.log('uid '+e.uid);
   Logger.log('projectid '+e.projectid);
   Logger.log('type '+e.type);
+  
+  if(e.projectid == ""){
+    e.action.push('projectList');
+    //e.action.push('publicList');
+    return content;
+  }
   if(e.type=='GET'){
     if(e.filename){ // get
       e.action.push('content');
@@ -80,6 +80,31 @@ function createBL(_content) {
   return content;
 }
 routerData.logicMapping['create'] = createBL;
+
+function getProjectList(_content) {  
+  var content = _content;
+  var e = content.request;
+  // 一覧画面の表示
+  //ROWID, code, price, uid, scope, filename, ext, content, timestamp
+  var sql = 'SELECT projectid FROM ' + tableId 
+    //+ ' WHERE '
+    //+ " uid = '" + e.uid +"'"
+    + " GROUP BY projectid "
+    + ' LIMIT 100';
+  Logger.log('getProjectList sql:'+sql);
+  var result = FusionTables.Query.sqlGet(sql);
+  Logger.log('getProjectList result:'+result);
+  
+  content.result = {"columns":result.columns,"rows":result.rows};
+ 
+  var output = HtmlService.createTemplateFromFile("projectlist");
+  output.content = content;
+  content.response = output.evaluate();
+  Logger.log('getProjectList response:'+content.response);
+  return content
+}
+routerData.logicMapping['projectList'] = getProjectList;
+
 
 function getContent(_content) {
   Logger.log('--------------- ');
@@ -143,6 +168,7 @@ function publicList(_content) {
   var sql = 'SELECT ROWID, filename, ext, timestamp, uid, scope FROM ' + tableId 
     + ' WHERE '
     + " scope NOT EQUAL TO 'private' "
+    + " and projectid = '" + e.projectid +"'"
     + ' LIMIT 100';
   var result = FusionTables.Query.sqlGet(sql);
   content.result = {"columns":result.columns,"rows":result.rows};
