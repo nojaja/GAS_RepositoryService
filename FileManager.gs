@@ -85,10 +85,8 @@ function getProjectList(_content) {
   var content = _content;
   var e = content.request;
   // 一覧画面の表示
-  //ROWID, code, price, uid, scope, filename, ext, content, timestamp
   var sql = 'SELECT projectid FROM ' + tableId 
-    //+ ' WHERE '
-    //+ " uid = '" + e.uid +"'"
+    //+ " WHERE " uid = '" + e.uid +"'"
     + " GROUP BY projectid "
     + ' LIMIT 100';
   Logger.log('getProjectList sql:'+sql);
@@ -96,16 +94,8 @@ function getProjectList(_content) {
   Logger.log('getProjectList result:'+result);
   
   content.result = {"columns":result.columns,"rows":result.rows};
- 
-  
-    e.action.push('makeExtHtmlContent');
-    e.pageId = 'projectlist';
-  /*
-  var output = HtmlService.createTemplateFromFile("projectlist");
-  output.content = content;
-  content.response = output.evaluate();
-  Logger.log('getProjectList response:'+content.response);
-  */
+  e.action.push('makeExtHtmlContent');
+  e.pageId = 'projectlist';
   return content
 }
 routerData.logicMapping['projectList'] = getProjectList;
@@ -118,8 +108,10 @@ function getContent(_content) {
   Logger.log('getContent '+e.filename);
   // 更新・削除画面の表示
   //ROWID, code, price, uid, scope, filename, ext, content, timestamp
-  var sql = "SELECT ROWID, filename, ext, timestamp, uid, scope, content FROM " + tableId + " WHERE filename = '" + e.filename +"'"
-   + " and ext = '" + e.ext + "'";
+  var sql = "SELECT ROWID, filename, ext, timestamp, uid, scope, content FROM " + tableId
+    + " WHERE filename = '" + e.filename +"'"
+    + " and ext = '" + e.ext + "'"
+    + " and projectid = '" + e.projectid +"'";
   Logger.log('getContent sql:'+sql);
   var result = FusionTables.Query.sqlGet(sql);
   Logger.log('getContent result:'+result);
@@ -131,9 +123,8 @@ function getContent(_content) {
     content.result.filename = row[1];
     content.result.ext = row[2];
     content.result.scope = row[5];
-  Logger.log('getContent row[6]:'+row[6]);
     content.result.content = Utilities.newBlob(Utilities.base64Decode( row[6], Utilities.Charset.UTF_8)).getDataAsString();
-  Logger.log('getContent row[6]#2:'+content.result.content);
+    Logger.log('getContent row[6]#2:'+content.result.content);
     e.action.push('makeResponse');
   }else{
     e.action.push('makeExtHtmlContent');
@@ -143,6 +134,7 @@ function getContent(_content) {
 }
 routerData.logicMapping['content'] = getContent;
 
+/*
 function getContentById(_content) {
   var content = _content;
   var e = content.request;
@@ -164,6 +156,7 @@ function getContentById(_content) {
   return content;
 }
 routerData.logicMapping['update'] = getContentById;
+*/
 
 function publicList(_content) {
   var content = _content;
@@ -181,33 +174,9 @@ function publicList(_content) {
   e.action.push('makeExtHtmlContent');
   e.pageId = 'list';
   return content
-  /*
-  var output = HtmlService.createTemplateFromFile("list");
-  output.content = content;
-  content.response = output.evaluate();
-  Logger.log('publicList response:'+content.response);
-  */
-  return content
-  
 }
 routerData.logicMapping['publicList'] = publicList;
 
-/*
-function mylist(_content) {
-  var content = _content;
-  var e = content.request;
-  // 一覧画面の表示
-  //ROWID, code, price, uid, scope, filename, ext, content, timestamp
-  var sql = 'SELECT ROWID, filename, ext, timestamp, uid, scope FROM ' + tableId 
-    + ' WHERE '
-    + " uid = '" + e.uid + "'"
-    + ' LIMIT 100';
-  var result = FusionTables.Query.sqlGet(sql);
-  content.result = {"columns":result.columns,"rows":result.rows};
-  return content;
-}
-routerData.logicMapping['mylist'] = mylist;
-*/
 
 // レコード追加
 function createRecordBL(_content) {
@@ -219,11 +188,6 @@ function createRecordBL(_content) {
               ,scope :e.parameters.scope || "public"
               ,content :Utilities.base64Encode((e.parameters.datafile.contents), Utilities.Charset.UTF_8) || ""
              }
-  var sql = "INSERT INTO " + tableId
-   + " ('filename','ext','timestamp','uid','scope','content')"
-   + " VALUES ('" + form.filename + "','" + form.ext + "','" + form.timestamp + "','" + e.uid + "','" + form.scope + "','" + form.content + "')";
-
-  //FusionTables.Table.update(resource, tableId)
   var temp = [];
   temp.push(e.uid);
   temp.push(e.projectid);
@@ -233,13 +197,11 @@ function createRecordBL(_content) {
   temp.push(form.scope);
   temp.push(form.timestamp);
   var rowsData = '"'+temp.join('","')+'"';
-    Logger.log('createRecordBL rowsData#1:'+rowsData);
+  Logger.log('createRecordBL rowsData#1:'+rowsData);
   var mediaData = Utilities.newBlob(rowsData, "application/octet-stream");
-    Logger.log('createRecordBL mediaData#1:'+mediaData);
   
   FusionTables.Table.importRows(tableId, mediaData);
   Logger.log('=================:');
-  //FusionTables.Query.sql(sql);
   return content;
 }
 routerData.logicMapping['createRecord'] = createRecordBL;
@@ -258,45 +220,22 @@ function updateRecordBL(_content) {
   Logger.log('updateRecordBL '+e.filename);
   // 更新・削除画面の表示
   //ROWID, code, price, uid, scope, filename, ext, content, timestamp
-  var selectsql = "SELECT ROWID, filename, ext, timestamp, uid, scope, content FROM " + tableId + " WHERE filename = '" + e.filename +"'"
-   + " and ext = '" + e.ext + "'";
+  var selectsql = "SELECT ROWID, filename, ext, timestamp, uid, scope, content FROM " + tableId 
+    + " WHERE filename = '" + e.filename +"'"
+    + " and ext = '" + e.ext + "'"
+    + " and projectid = '" + e.projectid +"'";
   Logger.log('updateRecordBL sql#1:'+selectsql);
   var selectresult = FusionTables.Query.sqlGet(selectsql);
   Logger.log('updateRecordBL result:'+selectresult);
   
   if( selectresult.rows && selectresult.rows.length > 0 ) {
-    /*
     var row = selectresult.rows[0];
-    var row_id = row[0];
-    
-    var form = { filename :e.filename||''
-              ,ext :e.ext|| "txt"
-              ,filename :e.filename || ""
-              ,ext :e.ext || "txt"
-              ,timestamp :formatDate(new Date())
-              ,scope :e.parameters.scope || "public"
-              ,content :Utilities.base64Encode((e.parameters.datafile.contents), Utilities.Charset.UTF_8) || ""
-             }
-    var sql = "UPDATE " + tableId
-     + " SET timestamp='" + form.timestamp + "', scope='" + form.scope + "', content='" + form.content + "'"
-     + " WHERE ROWID = '" + row_id + "'";
-    Logger.log('updateRecordBL sql#2:'+sql);
-    
-    var cnt = FusionTables.Query.sql(sql);
-    Logger.log('updateRecordBL rows:'+cnt.rows);
-    content.result = {"rows":cnt.rows};
-    */
-    var row = selectresult.rows[0];
-    var row_id = row[0];
-    
+    var row_id = row[0]; 
     var sql = "DELETE FROM " + tableId + " WHERE ROWID = '" + row_id + "'";
-    
     Logger.log('updateRecordBL sql#2:'+sql);
-    
     var cnt = FusionTables.Query.sql(sql);
-    Logger.log('updateRecordBL rows:'+cnt.rows);
+    Logger.log('updateRecordBL delete rows:'+cnt.rows);
     e.action.push('createRecord');
-    
   }else{
     e.action.push('createRecord');
   }
@@ -308,11 +247,9 @@ routerData.logicMapping['updateRecord'] = updateRecordBL;
 function updateRecord(form) {
   var e ={"parameter":{},"contextPath":"","contentLength":-1,"queryString":"","parameters":form};
   var pathInfo = splitPath(e.parameters.uid+"/"+e.parameters.projectid+"/"+e.parameters.datafile.name);
-
   e.path = pathInfo.paths;
   e.filename = pathInfo.filename;
   e.ext = pathInfo.ext;
-    
   return JSON.stringify(doExec(e,"POST"));
 }
 
