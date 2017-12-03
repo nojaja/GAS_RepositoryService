@@ -94,8 +94,12 @@ function getProjectList(_content) {
   Logger.log('getProjectList result:'+result);
   
   content.result = {"columns":result.columns,"rows":result.rows};
-  e.action.push('makeExtHtmlContent');
-  e.pageId = 'projectlist';
+  if(!e.parameter.t){
+    e.action.push('makeExtHtmlContent');
+    e.pageId = 'projectlist';
+  }else{
+    e.action.push('makeExtJsonContent');
+  }
   return content
 }
 routerData.logicMapping['projectList'] = getProjectList;
@@ -134,29 +138,6 @@ function getContent(_content) {
 }
 routerData.logicMapping['content'] = getContent;
 
-/*
-function getContentById(_content) {
-  var content = _content;
-  var e = content.request;
-  // 更新・削除画面の表示
-  //ROWID, code, price, uid, scope, filename, ext, content, timestamp
-  var sql = 'SELECT ROWID, filename, ext, timestamp, uid, scope, content FROM ' + tableId + ' WHERE ROWID = ' + e.parameters.row_id;
-  var result = FusionTables.Query.sqlGet(sql);
-  
-  content.result = {"columns":result.columns,"length":result.rows.length};
-  if( result.rows.length > 0 ) {
-    var row = result.rows[0];
-    content.result.row_id = row[0];
-    content.result.filename = row[1];
-    content.result.ext = row[2];
-    content.result.scope = row[5];
-    content.result.content = Utilities.newBlob(Utilities.base64Decode( row[6], Utilities.Charset.UTF_8)).getDataAsString();
-  }
-  e.action.push('makeResponse');
-  return content;
-}
-routerData.logicMapping['update'] = getContentById;
-*/
 
 function publicList(_content) {
   var content = _content;
@@ -170,9 +151,12 @@ function publicList(_content) {
     + ' LIMIT 100';
   var result = FusionTables.Query.sqlGet(sql);
   content.result = {"columns":result.columns,"rows":result.rows};
-  
-  e.action.push('makeExtHtmlContent');
-  e.pageId = 'list';
+  if(!e.parameter.t){
+    e.action.push('makeExtHtmlContent');
+    e.pageId = 'list';
+  }else{
+    e.action.push('makeExtJsonContent');
+  }
   return content
 }
 routerData.logicMapping['publicList'] = publicList;

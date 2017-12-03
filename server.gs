@@ -50,13 +50,12 @@ routerData.logicMapping['makeResponse'] = makeResponse;
 
 
 function makeExtJsonContent(content) {
-  var content  = JSON.stringify(content);
   var e = content.request;
-  Logger.log('makeExtJsonContent '+content.result);
+  Logger.log('makeExtJsonContent '+JSON.stringify(content));
   if (!e.parameter.callback) {
-    content.response = ContentService.createTextOutput(content.result).setMimeType(ContentService.MimeType.JSON);
+    content.response = ContentService.createTextOutput(JSON.stringify(content.result)).setMimeType(ContentService.MimeType.JSON);
   } else {
-    content.response = ContentService.createTextOutput(e.parameter.callback + "(" + content.result + ");").setMimeType(ContentService.MimeType.JAVASCRIPT);
+    content.response = ContentService.createTextOutput(e.parameter.callback + "(" + JSON.stringify(content.result) + ");").setMimeType(ContentService.MimeType.JAVASCRIPT);
   }
   Logger.log('makeExtJsonContent response:'+content.response);
   return content

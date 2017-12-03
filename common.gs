@@ -57,7 +57,7 @@ group(3)	index
 group(4)	html
 group(5)	
   */
-  var group = filename.match("^/?(.*/)?((.+?)\.([a-z]+))?([\?#;].*)?$");
+  var group = filename.match("^/?(.*/)?((.+?)(\.[a-z]+)?)?([\?#;].*)?$");
   return {fullpath:group[0] ,path:group[1],paths:(group[1]||"").split("/"), fullfilename:group[2]||'', filename:group[3]||'', ext:group[4]||''  };
 }
 
