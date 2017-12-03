@@ -97,10 +97,15 @@ function getProjectList(_content) {
   
   content.result = {"columns":result.columns,"rows":result.rows};
  
+  
+    e.action.push('makeExtHtmlContent');
+    e.pageId = 'projectlist';
+  /*
   var output = HtmlService.createTemplateFromFile("projectlist");
   output.content = content;
   content.response = output.evaluate();
   Logger.log('getProjectList response:'+content.response);
+  */
   return content
 }
 routerData.logicMapping['projectList'] = getProjectList;
@@ -172,16 +177,22 @@ function publicList(_content) {
     + ' LIMIT 100';
   var result = FusionTables.Query.sqlGet(sql);
   content.result = {"columns":result.columns,"rows":result.rows};
- 
+  
+  e.action.push('makeExtHtmlContent');
+  e.pageId = 'list';
+  return content
+  /*
   var output = HtmlService.createTemplateFromFile("list");
   output.content = content;
   content.response = output.evaluate();
   Logger.log('publicList response:'+content.response);
+  */
   return content
   
 }
 routerData.logicMapping['publicList'] = publicList;
 
+/*
 function mylist(_content) {
   var content = _content;
   var e = content.request;
@@ -196,7 +207,7 @@ function mylist(_content) {
   return content;
 }
 routerData.logicMapping['mylist'] = mylist;
-
+*/
 
 // レコード追加
 function createRecordBL(_content) {
