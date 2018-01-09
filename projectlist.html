@@ -1,4 +1,10 @@
 <html>
+<? 
+/*
+*  プロジェクト一覧を表示するページ
+*  URL ?p=/userid/ の場合に表示される useridの指定がない場合はpublicなプロジェクトのみを表示します。
+*/
+?>
   <head>
     <base target="_top" />
     <style>
@@ -26,12 +32,13 @@
     <ul class="uk-nav uk-nav-offcanvas uk-nav-parent-icon" data-uk-nav="">
       <li class="uk-nav-header">Project</li>
 <?
+  if( content.result.rows && content.result.rows.length > 0 ) {
   var rows = content.result.rows;
   for( var i=0;i<rows.length;i++ ) {
 ?>                              
-      <li class="uk-parent"><a href="<?=content.request.baseurl ?>?p=/uid/<?= rows[i][0]?>/"><i class="uk-icon-folder"></i> <?= rows[i][0]?></a></li>
+      <li class="uk-parent"><a href="<?=content.request.baseurl ?>?p=/<?= content.request.uid ?>/<?= rows[i][0]?>/"><i class="uk-icon-folder"></i> <?= rows[i][0]?></a></li>
 <?
-  }
+  }}
 ?>
     </ul>
   </div>
@@ -45,12 +52,13 @@
       <h3 class="uk-panel-title">Project List</h3>
       <ul class="uk-nav uk-nav-side uk-nav-parent-icon" data-uk-nav="">
 <?
+  if( content.result.rows && content.result.rows.length > 0 ) {
   var rows = content.result.rows;
   for( var i=0;i<rows.length;i++ ) {
 ?>                              
-        <li class="uk-parent"><a href="<?=content.request.baseurl ?>?p=/uid/<?= rows[i][0]?>/"><i class="uk-icon-folder"></i> <?= rows[i][0]?></a></li>
+        <li class="uk-parent"><a href="<?=content.request.baseurl ?>?p=/<?= content.request.uid ?>/<?= rows[i][0]?>/"><i class="uk-icon-folder"></i> <?= rows[i][0]?></a></li>
 <?
-  }
+  }}
 ?>
       </ul>
     </div>
@@ -58,9 +66,6 @@
 </div>
 
 </div>
-<?=JSON.stringify(content.request)?><br>
-
-
 <script src="https://cdnjs.cloudflare.com/ajax/libs/jquery/3.1.1/jquery.min.js"></script>
 <script src="https://code.jquery.com/jquery-migrate-3.0.0.js"></script>
 <script src="https://cdnjs.cloudflare.com/ajax/libs/uikit/2.12.0/js/uikit.min.js"></script>

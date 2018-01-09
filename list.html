@@ -1,4 +1,10 @@
 <html>
+<? 
+/*
+*  ファイル一覧を表示するページ
+*  URL ?p=/userid/projectid/ の場合に表示される useridの指定がない場合はpublicなプロジェクトのみを表示します。
+*/
+?>
   <head>
     <base target="_top" />
     <style>
@@ -23,14 +29,14 @@
 
     <ul class="uk-nav uk-nav-offcanvas uk-nav-parent-icon" data-uk-nav="">
       <li class="uk-nav-header">File</li>
-      <li ><a href="<?=content.request.baseurl ?>?p=/uid/"><i class="uk-icon-arrow-left"></i> ..</a></li>
+      <li ><a href="<?=content.request.baseurl ?>?p=/<?= content.request.uid ?>/"><i class="uk-icon-arrow-left"></i> ..</a></li>
 
 <?
   if( content.result.rows && content.result.rows.length > 0 ) {
     var rows = content.result.rows;
     for( var i=0;i<rows.length;i++ ) {
 ?>                              
-      <li ><a href="<?=content.request.baseurl ?>?p=/uid/projectid/<?= rows[i][1] ?>.<?= rows[i][2]?>"><i class="uk-icon-file"></i> <?= rows[i][1] ?><?= rows[i][2]?></a></li>
+      <li ><a href="<?=content.request.baseurl ?>?p=/<?= content.request.uid ?>/<?= content.request.projectid ?>/<?= rows[i][1] ?>.<?= rows[i][2]?>"><i class="uk-icon-file"></i> <?= rows[i][1] ?><?= rows[i][2]?></a></li>
 <?
     }
   }
@@ -48,13 +54,13 @@
     <div class="uk-panel uk-panel-box uk-panel-box-secondary ">
       <h3 class="uk-panel-title">File List</h3>
       <ul class="tm-nav uk-nav uk-nav-side uk-nav-parent-icon" data-uk-nav="">
-      <li ><a href="<?=content.request.baseurl ?>?p=/uid/"><i class="uk-icon-arrow-left"></i> ..</a></li>
+      <li ><a href="<?=content.request.baseurl ?>?p=/<?= content.request.uid ?>/"><i class="uk-icon-arrow-left"></i> ..</a></li>
 <?
   if( content.result.rows && content.result.rows.length > 0 ) {
     var rows = content.result.rows;
     for( var i=0;i<rows.length;i++ ) {
 ?>                              
-        <li ><a href="<?=content.request.baseurl ?>?p=/uid/<?= content.request.projectid ?>/<?= rows[i][1] ?><?= rows[i][2]?>"><i class="uk-icon-file"></i> <?= rows[i][1] ?><?= rows[i][2]?></a></li>
+        <li ><a href="<?=content.request.baseurl ?>?p=/<?= content.request.uid ?>/<?= content.request.projectid ?>/<?= rows[i][1] ?><?= rows[i][2]?>"><i class="uk-icon-file"></i> <?= rows[i][1] ?><?= rows[i][2]?></a></li>
 <?
     }
   }
@@ -62,54 +68,64 @@
       </ul>
     </div>
   </div>
+  
   <div class="tm-main uk-width-medium-3-4">
     <article class="uk-article">
     <h1 class="uk-article-title">File</h1>
-      <div class="uk-grid" data-uk-grid-margin="">
-      
-      
+    
 <?
+  /* ファイル一覧の表示 */
   if( content.result.rows && content.result.rows.length > 0 ) {
-    var rows = content.result.rows;
-    for( var i=0;i<rows.length;i++ ) {
 ?>
-                                <div class="uk-width-medium-1-3">
-                                    <div class="uk-panel uk-panel-box">
-                                        <h3 class="uk-panel-title"><a href="<?=content.request.baseurl ?>?p=/uid/<?= content.request.projectid ?>/<?= rows[i][1] ?><?= rows[i][2]?>"><i class="uk-icon-file"></i><?= rows[i][1] ?><?= rows[i][2]?></a></h3>
-                                        <div class="uk-panel-badge uk-badge"><?= rows[i][5] ?></div>
-                                        <?= rows[i][3] ?>
-                                        <hr>
-                                        <a class="uk-button" href="">edit</a>
-                                    </div>
-                                </div>
-<?
-    }
-  }
-?>
-
+    <div class="uk-panel uk-panel-box uk-panel-box-secondary">
+      <table class="uk-table uk-table-striped">
+      <thead>
+      <tr><th>ファイル名</th><th>更新日</th><th>scope</th></tr>
+      </thead>
+      <tbody>
+      <tr>
+      <td><a href="<?=content.request.baseurl ?>?p=/<?= content.request.uid ?>/">..</a></td>
+      <td></td>
+      <td></td>
+      </tr>
       
-                                <div class="uk-width-medium-1-3">
-                                    <div class="uk-panel uk-panel-box">
-                                        <h3 class="uk-panel-title">ADD</h3>
-<form id="form1" class="uk-form" action="<?=content.request.baseurl ?>?p=/<?= content.request.uid ?>/<?= content.request.projectid ?>/<?= content.request.filename ?><?= content.request.ext ?>" method="post" enctype="multipart/form-data" accept-charset='utf8'>
-<!--
-datafile":{"type":"text/plain","length":9659,"contents":
--->
-<input type="hidden" name="uid" value="<?= content.request.uid ?>">
-<input type="hidden" name="projectid" value="<?= content.request.projectid ?>">
-<div><label>scope</label><input name="scope" value="public"></div>
-<input type="hidden" id="filename" name="datafilefilename" value="">
-<input type="hidden" id="contents" name="datafilecontents" value="">
-<input type="file" id="file">
-<input type="hidden" id="type" name="datafiletype" value="">
-<input type="hidden" id="length" name="datafilelength" value="">
-<hr>
-<input class="uk-button" type='submit' value='submit'>
-</form>
-                                    </div>
-                                </div>
-      </div>
+      <?
+      var rows = content.result.rows;
+      for( var i=0;i<rows.length;i++ ) {
+      ?>
+      <tr>
+      <td><a target="_blank" href="<?=content.request.baseurl ?>?p=/<?= content.request.uid ?>/<?= content.request.projectid ?>/<?= rows[i][1] ?><?= rows[i][2]?>"><?= rows[i][1] ?><?= rows[i][2]?></a></td>
+      <td><?= rows[i][3] ?></td>
+      <td><?= rows[i][5] ?></td>
+      </tr>
+      <?
+      }
+      ?>
+      </tbody>
+      </table>
+    </div>
+<?
+  }
+?>    
 
+    <br>
+    <div class="uk-panel uk-panel-box uk-panel-box-secondary">
+      <form id="form1" class="uk-form" action="<?=content.request.baseurl ?>?p=/<?= content.request.uid ?>/<?= content.request.projectid ?>/<?= content.request.filename ?><?= content.request.ext ?>" method="post" enctype="multipart/form-data" accept-charset='utf8'>
+      <!--
+      datafile":{"type":"text/plain","length":9659,"contents":
+      -->
+      <input type="hidden" name="uid" value="<?= content.request.uid ?>">
+      <input type="hidden" name="projectid" value="<?= content.request.projectid ?>">
+      <div><label>scope</label><input name="scope" value="public"></div>
+      <input type="hidden" id="filename" name="datafilefilename" value="">
+      <input type="hidden" id="contents" name="datafilecontents" value="">
+      <div><label>datafile</label><input type="file" id="file"></div>
+      <input type="hidden" id="type" name="datafiletype" value="">
+      <input type="hidden" id="length" name="datafilelength" value="">
+      <input type='submit' value='submit'>
+      </form>
+    </div>
+    
     </article>
   </div>
 
@@ -117,77 +133,7 @@ datafile":{"type":"text/plain","length":9659,"contents":
 <br>
 
 
-<?
-  if( content.result.rows && content.result.rows.length > 0 ) {
-?>
-    <div class="uk-panel uk-panel-box uk-panel-box-secondary">
-      <h3 class="uk-panel-title">File</h3>
-<table class="uk-table uk-table-striped">
-<thead>
-  <tr>
-   <th>ファイル名</th>
-   <th>更新日</th>
-   <th>scope</th>
- </tr>
-</thead>
-<tbody>
-  <tr>
-   <td><a href="<?=content.request.baseurl ?>?p=/uid/">..</a></td>
-   <td></td>
-   <td></td>
- </tr>
- 
-<?
-    var rows = content.result.rows;
-    for( var i=0;i<rows.length;i++ ) {
-?>
-  <tr>
-   <td><a href="<?=content.request.baseurl ?>?p=/uid/<?= content.request.projectid ?>/<?= rows[i][1] ?><?= rows[i][2]?>"><?= rows[i][1] ?><?= rows[i][2]?></a></td>
-   <td><?= rows[i][3] ?></td>
-   <td><?= rows[i][5] ?></td>
- </tr>
-<?
-    }
-?>
-</tbody>
-</table>
-    </div>
-<?
-  }
-?>
-<br>
-<!--
-<div class="uk-panel uk-panel-box uk-panel-box-secondary">
-<form class="uk-form">
-<div><label>uid</label><input name="uid" value="<?= content.request.uid ?>"></div>
-<div><label>projectid</label><input name="projectid" value="<?= content.request.projectid ?>"></div>
-<div><label>scope</label><input name="scope" value="public"></div>
-<div><label>datafile</label><input type="file" name="datafile"></div>
-<input type="button" onclick="google.script.run.withSuccessHandler(onSuccess).createRecord(this.parentNode);" value="追加">
-</form>
 </div>
--->
-<div class="uk-panel uk-panel-box uk-panel-box-secondary">
-<form id="form1" class="uk-form" action="<?=content.request.baseurl ?>?p=/<?= content.request.uid ?>/<?= content.request.projectid ?>/<?= content.request.filename ?><?= content.request.ext ?>" method="post" enctype="multipart/form-data" accept-charset='utf8'>
-<!--
-datafile":{"type":"text/plain","length":9659,"contents":
--->
-<div><label>uid</label><input name="uid" value="<?= content.request.uid ?>"></div>
-<div><label>projectid</label><input name="projectid" value="<?= content.request.projectid ?>"></div>
-<div><label>scope</label><input name="scope" value="public"></div>
-<input type="hidden" id="filename" name="datafilefilename" value="">
-<input type="hidden" id="contents" name="datafilecontents" value="">
-<div><label>datafile</label><input type="file" id="file"></div>
-<div><label>datafile.type</label><input id="type" name="datafiletype" value=""></div>
-<div><label>datafile.length</label><input id="length" name="datafilelength" value=""></div>
-<input type='submit' value='submit'>
-</form>
-</div>
-
-
-</div>
-<?=JSON.stringify(content.request)?><br>
-
 <script src="https://cdnjs.cloudflare.com/ajax/libs/jquery/3.1.1/jquery.min.js"></script>
 <script src="https://code.jquery.com/jquery-migrate-3.0.0.js"></script>
 <script src="https://cdnjs.cloudflare.com/ajax/libs/uikit/2.12.0/js/uikit.min.js"></script>
@@ -245,7 +191,7 @@ function onSuccess(data) {
 		// ------------------------------------------------------------
 		// テキストとして読み込む
 		// ------------------------------------------------------------
-		if(file.type.indexOf("text") == 0){
+		//if((file.type.indexOf("text") == 0)){
 
 			// ------------------------------------------------------------
 			// 読み込み成功時に実行されるイベント
@@ -265,6 +211,7 @@ function onSuccess(data) {
 		// ------------------------------------------------------------
 		// バイナリとして読み込む
 		// ------------------------------------------------------------
+        /*
 		}else{
 
 			// ------------------------------------------------------------
@@ -291,7 +238,7 @@ function onSuccess(data) {
 						result += " " + str;
 					}
 				}
-				datafile.value = result;
+				datafilecontents.value = result;
 			};
 
 			// ------------------------------------------------------------
@@ -300,6 +247,7 @@ function onSuccess(data) {
 			file_reader.readAsArrayBuffer(file);
 
 		}
+        */
   }
 
   inputFile.addEventListener('change', fileChange, false);

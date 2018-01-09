@@ -46,7 +46,16 @@ function init(_content) {
   }
   if(e.type=='GET'){
     if(e.filename){ // get
-      e.action.push('content');
+      if(e.parameter.contents){
+        
+        //contentsをGETで登録
+        e.parameters.datafile = {"contents":e.parameter.contents};
+        e.action.push('publicList');
+        e.action.push('updateRecord');
+      }else{
+        //contents取得
+        e.action.push('content');
+      }
     }else{//search
       e.action.push('publicList');
     }
@@ -63,7 +72,12 @@ function init(_content) {
         e.pathInfo = e.parameters.uid+"/"+e.parameters.projectid+"/"+encodeString(datafilename);
         
         e.parameters.datafile = {"type":e.parameters.datafiletype,"length":e.parameters.datafilelength,"contents":contents,"name":datafilename}
-        e.action.push('publicList');
+        
+        if(!e.parameter.t){
+          e.action.push('publicList');
+        }else{
+          e.action.push('makeExtJsonContent');
+        }
         e.action.push('updateRecord');
       }else{//delete
         e.action.push('deleteRecord');
@@ -86,7 +100,7 @@ function getProjectList(_content) {
   var e = content.request;
   // 一覧画面の表示
   var sql = 'SELECT projectid FROM ' + tableId 
-    //+ " WHERE " uid = '" + e.uid +"'"
+    + " WHERE  uid = '" + e.uid +"'"
     + " GROUP BY projectid "
     + ' LIMIT 100';
   Logger.log('getProjectList sql:'+sql);
@@ -115,7 +129,8 @@ function getContent(_content) {
   var sql = "SELECT ROWID, filename, ext, timestamp, uid, scope, content FROM " + tableId
     + " WHERE filename = '" + e.filename +"'"
     + " and ext = '" + e.ext + "'"
-    + " and projectid = '" + e.projectid +"'";
+    + " and projectid = '" + e.projectid +"'"
+    + " and uid = '" + e.uid +"'";
   Logger.log('getContent sql:'+sql);
   var result = FusionTables.Query.sqlGet(sql);
   Logger.log('getContent result:'+result);
@@ -129,7 +144,14 @@ function getContent(_content) {
     content.result.scope = row[5];
     content.result.content = Utilities.newBlob(Utilities.base64Decode( row[6], Utilities.Charset.UTF_8)).getDataAsString();
     Logger.log('getContent row[6]#2:'+content.result.content);
-    e.action.push('makeResponse');
+    
+    
+    if(!e.parameter.t){
+      e.action.push('makeResponse');
+    }else{
+      e.action.push('makeExtJsonContent');
+    }
+    
   }else{
     e.action.push('makeExtHtmlContent');
     e.pageId = '404';
@@ -144,10 +166,11 @@ function publicList(_content) {
   var e = content.request;
   // 一覧画面の表示
   //ROWID, code, price, uid, scope, filename, ext, content, timestamp
-  var sql = 'SELECT ROWID, filename, ext, timestamp, uid, scope FROM ' + tableId 
+  var sql = 'SELECT ROWID, filename, ext, timestamp, uid, scope,projectid FROM ' + tableId 
     + ' WHERE '
     + " scope NOT EQUAL TO 'private' "
     + " and projectid = '" + e.projectid +"'"
+    + " and uid = '" + e.uid +"'";
     + ' LIMIT 100';
   var result = FusionTables.Query.sqlGet(sql);
   content.result = {"columns":result.columns,"rows":result.rows};
@@ -171,6 +194,7 @@ function createRecordBL(_content) {
               ,timestamp :formatDate(new Date())
               ,scope :e.parameters.scope || "public"
               ,content :Utilities.base64Encode((e.parameters.datafile.contents), Utilities.Charset.UTF_8) || ""
+              ,lock :"false"
              }
   var temp = [];
   temp.push(e.uid);
@@ -180,6 +204,8 @@ function createRecordBL(_content) {
   temp.push(form.content);
   temp.push(form.scope);
   temp.push(form.timestamp);
+  temp.push(form.lock);
+  
   var rowsData = '"'+temp.join('","')+'"';
   Logger.log('createRecordBL rowsData#1:'+rowsData);
   var mediaData = Utilities.newBlob(rowsData, "application/octet-stream");
@@ -206,8 +232,10 @@ function updateRecordBL(_content) {
   //ROWID, code, price, uid, scope, filename, ext, content, timestamp
   var selectsql = "SELECT ROWID, filename, ext, timestamp, uid, scope, content FROM " + tableId 
     + " WHERE filename = '" + e.filename +"'"
+    + " and lock = 'false'";
     + " and ext = '" + e.ext + "'"
-    + " and projectid = '" + e.projectid +"'";
+    + " and projectid = '" + e.projectid +"'"
+    + " and uid = '" + e.uid +"'";
   Logger.log('updateRecordBL sql#1:'+selectsql);
   var selectresult = FusionTables.Query.sqlGet(selectsql);
   Logger.log('updateRecordBL result:'+selectresult);

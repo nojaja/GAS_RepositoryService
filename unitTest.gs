@@ -99,6 +99,11 @@ function createRecordTest() {
   return doExec(e,"POST");
 }
 
+function createRecord_getmethod_Test() {
+  var e ={"parameter":{"p":"my/test/test.txt","contents":"hoge"},"contextPath":"","contentLength":-1,"queryString":"","parameters":{},"pathInfo":"my/test/test.txt"};
+  return doExec(e,"GET");
+}
+
 function doGetFileTest() {
   var e ={"parameter":{},"contextPath":"","contentLength":-1,"queryString":"","parameters":{},"pathInfo":"my/test/index.html"};
   return doExec(e,"GET");
